@@ -79,7 +79,7 @@
     ;                               {:L L
     ;                                :other-info "a1b2c3d4e5434156536964645f0870821ccb75c4a49052e749ae1494aa9a"})))
 
-    (is (= "0a042bf6885acbfdc28924df0a37" ;; > Result = F (6 - DKM changed)
+    (is (= "0a042bf6885acbfdc28924df0a37"
            (key-derivation/dkm :sha256
                                "aefb41e860887fcd4a3aa16f1a1d82136397b14f8fbdebf68787e04751caa4b1a0ce57946918592c25c8261b80a7a85c3f2e6c1e3288e005093134c212d3797f11fe77963a6c7c9c93a33149db1219d0744fc0702b56b29e8c1b7e94305aa8d3c68401cae1d31ec6c727cd2b5c58e6adacc65850e4ac320952ca31402344e361d5abb282e78e396f3a89efa416392fa99a12834e02e1ff5601bdde48c333405ae40daec3814246221378af3d2413626b53777409ccbe706bcb4dcf50208b2e4c895503f3ebb534b197e17abbd9db2e85b8137c7f4928b884ea5cbe3a25d3483cebe252caeda0004aeb5b32721841ed4eb7c794246c03f6ca0907575215c27955"
                                {:L L
