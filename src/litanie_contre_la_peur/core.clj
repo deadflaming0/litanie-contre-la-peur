@@ -83,7 +83,7 @@
                  :mqv1 (:static-public-key initiator-keys)
                  :mqv2 (:ephemeral-public-key initiator-keys))}))
 
-(defn agreement*
+(defn agreement
   [scheme mode domain-parameters initiator-keys responder-keys]
   (let [{:keys [xA yA yB rA tA tB]} (scheme+mode->agreement-keys
                                       scheme
@@ -94,7 +94,7 @@
       (shared-secret domain-parameters xA yB rA tA tB)
       :bottom)))
 
-(defn agreement
+(defn run-protocol
   [{:keys [scheme key-derivation #_key-confirmation]} ;; add :or
    mode
    dkm-randomness
@@ -103,7 +103,7 @@
     initiator-keys :keys}
    {responder-identity :identity
     responder-keys :keys}]
-  (let [Z (agreement* scheme mode domain-parameters initiator-keys responder-keys)]
+  (let [Z (agreement scheme mode domain-parameters initiator-keys responder-keys)]
     (if (not= :bottom Z)
       (key-derivation/dkm
         (:algorithm key-derivation)
