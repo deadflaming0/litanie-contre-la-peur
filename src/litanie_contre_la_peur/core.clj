@@ -18,10 +18,10 @@
 (defn- shared-secret
   [{:keys [p q]} xA yB rA tA tB]
   (let [w (.toBigInteger
-            (.divide (BigDecimal. (.subtract (BigInteger/valueOf (.bitLength q))
-                                             BigInteger/ONE))
-                     BigDecimal/TWO
-                     RoundingMode/CEILING))
+           (.divide (BigDecimal. (.subtract (BigInteger/valueOf (.bitLength q))
+                                            BigInteger/ONE))
+                    BigDecimal/TWO
+                    RoundingMode/CEILING))
         two-pow-w (.pow BigInteger/TWO w)
         TA (.add (.mod tA two-pow-w) two-pow-w)
         SA (.mod (.add rA (.multiply TA xA)) q)
@@ -86,10 +86,10 @@
 (defn agreement
   [scheme mode domain-parameters initiator-keys responder-keys]
   (let [{:keys [xA yA yB rA tA tB]} (scheme+mode->agreement-keys
-                                      scheme
-                                      mode
-                                      initiator-keys
-                                      responder-keys)]
+                                     scheme
+                                     mode
+                                     initiator-keys
+                                     responder-keys)]
     (if (valid-input? scheme domain-parameters xA yA yB rA tA tB)
       (shared-secret domain-parameters xA yB rA tA tB)
       :bottom)))
@@ -106,12 +106,12 @@
   (let [Z (agreement scheme mode domain-parameters initiator-keys responder-keys)]
     (if (not= :bottom Z)
       (key-derivation/dkm
-        (:algorithm key-derivation)
-        Z
-        {:L (:bit-length key-derivation)
-         :other-info (concat initiator-identity
-                             responder-identity
-                             dkm-randomness)})
+       (:algorithm key-derivation)
+       Z
+       {:L (:bit-length key-derivation)
+        :other-info (concat initiator-identity
+                            responder-identity
+                            dkm-randomness)})
       Z)))
 
 (comment
@@ -122,5 +122,4 @@
                       }
      :key-confirmation {:type :none ;; | `:unilateral` | `:bilateral`
                         :algorithm :example1 ;; | `:example2` | `:example3`
-                        }})
-  )
+                        }}))
