@@ -105,13 +105,12 @@
     responder-keys :keys}]
   (let [Z (agreement scheme mode domain-parameters initiator-keys responder-keys)]
     (if (not= :bottom Z)
-      (key-derivation/dkm
-       (:algorithm key-derivation)
-       Z
-       {:L (:bit-length key-derivation)
-        :other-info (concat initiator-identity
-                            responder-identity
-                            dkm-randomness)})
+      (key-derivation/dkm (:algorithm key-derivation)
+                          Z
+                          {:L (:bit-length key-derivation)
+                           :other-info (concat initiator-identity
+                                               responder-identity
+                                               dkm-randomness)})
       Z)))
 
 (comment
