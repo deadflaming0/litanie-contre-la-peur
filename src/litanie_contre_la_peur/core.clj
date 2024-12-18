@@ -1,19 +1,9 @@
 (ns litanie-contre-la-peur.core
   "Implementation of FFC MQV — C(1e, 2s) (MQV1) and C(2e, 2s) (MQV2) — as specified in NIST Special Publication 800-56A Revision 3."
-  (:require [litanie-contre-la-peur.key-derivation :as key-derivation])
+  (:require [litanie-contre-la-peur.conversions :as conversions]
+            [litanie-contre-la-peur.key-confirmation :as key-confirmation]
+            [litanie-contre-la-peur.key-derivation :as key-derivation])
   (:import (java.math RoundingMode)))
-
-(defn hex-str->big-int
-  [x]
-  (BigInteger. x 16))
-
-(defn- z->Z
-  [x p]
-  (let [t (.bitLength p)
-        n (/ t 8)
-        ba (.toByteArray x)]
-    (apply str (map #(format "%02x" %)
-                    (take-last n ba)))))
 
 (defn- shared-secret
   [{:keys [p q]} xA yB rA tA tB]
@@ -29,8 +19,11 @@
         z (.modPow (.multiply tB (.modPow yB TB p)) SA p)]
     (if (or (<= z BigInteger/ONE)
             (= z (.subtract p BigInteger/ONE)))
-      (throw (SecurityException. "Error during shared secret calculation."))
-      (z->Z z p))))
+      :bottom
+      (let [t (.bitLength p)
+            n (quot t 4)
+            Z (conversions/big-int->hex-str z)]
+        (subs Z (- (count Z) n))))))
 
 (defn- valid-public-key?
   [{:keys [p q]} public-key]
@@ -63,62 +56,59 @@
          :mqv2 (and (valid-public-key? domain-parameters yB)
                     (valid-public-key? domain-parameters tB)))))
 
-(defn- scheme+mode->agreement-keys
-  [scheme mode initiator-keys responder-keys]
-  (case mode
-    :init {:xA (:static-private-key initiator-keys)
-           :yA (:static-public-key initiator-keys) ;; not used in `shared-secret`, used for validation purposes
-           :yB (:static-public-key responder-keys)
-           :rA (:ephemeral-private-key initiator-keys)
-           :tA (:ephemeral-public-key initiator-keys)
-           :tB (case scheme
-                 :mqv1 (:static-public-key responder-keys)
-                 :mqv2 (:ephemeral-public-key responder-keys))}
-    :resp {:xA (:static-private-key responder-keys)
-           :yA (:static-public-key responder-keys) ;; not used in `shared-secret`, used for validation purposes
-           :yB (:static-public-key initiator-keys)
-           :rA (:ephemeral-private-key responder-keys)
-           :tA (:ephemeral-public-key responder-keys)
-           :tB (case scheme
-                 :mqv1 (:static-public-key initiator-keys)
-                 :mqv2 (:ephemeral-public-key initiator-keys))}))
+(defn- scheme+role->agreement-keys
+  [scheme role initiator responder]
+  (case role
+    :initiator
+    {:xA (:static-private-key initiator)
+     :yA (:static-public-key initiator) ;; not used in `shared-secret`, used for validation purposes
+     :yB (:static-public-key responder)
+     :rA (:ephemeral-private-key initiator)
+     :tA (:ephemeral-public-key initiator)
+     :tB (case scheme
+           :mqv1 (:static-public-key responder)
+           :mqv2 (:ephemeral-public-key responder))}
+
+    :responder
+    {:xA (:static-private-key responder)
+     :yA (:static-public-key responder) ;; not used in `shared-secret`, used for validation purposes
+     :yB (:static-public-key initiator)
+     :rA (:ephemeral-private-key responder)
+     :tA (:ephemeral-public-key responder)
+     :tB (case scheme
+           :mqv1 (:static-public-key initiator)
+           :mqv2 (:ephemeral-public-key initiator))}))
 
 (defn agreement
-  [scheme mode domain-parameters initiator-keys responder-keys]
-  (let [{:keys [xA yA yB rA tA tB]} (scheme+mode->agreement-keys
+  [scheme role domain-parameters initiator responder]
+  (let [{:keys [xA yA yB rA tA tB]} (scheme+role->agreement-keys
                                      scheme
-                                     mode
-                                     initiator-keys
-                                     responder-keys)]
+                                     role
+                                     initiator
+                                     responder)]
     (if (valid-input? scheme domain-parameters xA yA yB rA tA tB)
       (shared-secret domain-parameters xA yB rA tA tB)
       :bottom)))
 
-(defn run-protocol
-  [{:keys [scheme key-derivation #_key-confirmation]} ;; add :or
-   mode
-   dkm-randomness
+(defn establish-key
+  [{:keys [scheme key-derivation]}
+   role
    domain-parameters
-   {initiator-identity :identity
-    initiator-keys :keys}
-   {responder-identity :identity
-    responder-keys :keys}]
-  (let [Z (agreement scheme mode domain-parameters initiator-keys responder-keys)]
-    (if (not= :bottom Z)
-      (key-derivation/dkm (:algorithm key-derivation)
-                          Z
-                          {:L (:bit-length key-derivation)
-                           :other-info (concat initiator-identity
-                                               responder-identity
-                                               dkm-randomness)})
-      Z)))
-
-(comment
-  (def protocol-settings
-    {:scheme :mqv1 ;; | `:mqv2`
-     :key-derivation {:algorithm :sha224 ;; | `:sha256` | `:sha384` | `:sha512`
-                      :bit-length 112 ;; ???
-                      }
-     :key-confirmation {:type :none ;; | `:unilateral` | `:bilateral`
-                        :algorithm :example1 ;; | `:example2` | `:example3`
-                        }}))
+   initiator
+   responder]
+  (let [result (agreement scheme role domain-parameters initiator responder)]
+    (if (not= :bottom result)
+      (let [L (:bit-length key-derivation)
+            fixed-info (key-derivation/fixed-info role
+                                                  (-> initiator
+                                                      :static-public-key
+                                                      conversions/big-int->hex-str)
+                                                  (-> responder
+                                                      :static-public-key
+                                                      conversions/big-int->hex-str)
+                                                  (:salt key-derivation))]
+        (key-derivation/dkm (:algorithm key-derivation)
+                            result
+                            {:L L
+                             :fixed-info fixed-info}))
+      result)))
