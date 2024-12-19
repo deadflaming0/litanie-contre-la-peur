@@ -1,7 +1,6 @@
 (ns litanie-contre-la-peur.core
   "Implementation of FFC MQV — C(1e, 2s) (MQV1) and C(2e, 2s) (MQV2) — as specified in NIST Special Publication 800-56A Revision 3."
   (:require [litanie-contre-la-peur.conversions :as conversions]
-            [litanie-contre-la-peur.key-confirmation :as key-confirmation]
             [litanie-contre-la-peur.key-derivation :as key-derivation])
   (:import (java.math RoundingMode)))
 

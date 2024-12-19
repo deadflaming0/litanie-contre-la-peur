@@ -34,79 +34,89 @@
   (let [mid (quot (count dkm) 2)]
     (subs dkm 0 mid)))
 
+(defn- unsupported-operation?
+  [scheme {key-confirmation-algorithm :algorithm
+           key-confirmation-type :type}]
+  (let [supported-algorithms #{:hmacsha224 :hmacsha256 :hmacsha384 :hmacsha512}]
+    (or (not= scheme :mqv1)
+        (not (contains? supported-algorithms key-confirmation-algorithm))
+        (not= key-confirmation-type :unilateral))))
+
 (defn mac-tag-function
   [{:keys [scheme key-confirmation]}
    key-agreement-role
    key-confirmation-role
    dkm]
-  (let [mac-key (extract-mac-key dkm)
-        expression [scheme
-                    (:type key-confirmation)
-                    key-agreement-role
-                    key-confirmation-role]]
-    (case expression
-      [:mqv1 :unilateral :initiator :provider]
+  (if (unsupported-operation? scheme key-confirmation)
+    (throw (UnsupportedOperationException. "Not implemented yet."))
+    (let [mac-key (extract-mac-key dkm)
+          expression [scheme
+                      (:type key-confirmation)
+                      key-agreement-role
+                      key-confirmation-role]]
+      (case expression
+        [:mqv1 :unilateral :initiator :provider]
 
-      ;; MacData = "KC_1_U" ||
-      ;;           (:static-public-key initiator) (IUTid) ||
-      ;;           (:static-public-key responder) (CAVSid) ||
-      ;;           (:ephemeral-public-key initiator) (YephemIUT)
-      ;;           nonce (responder) (NonceEphemCAVS)
+        ;; MacData = "KC_1_U" ||
+        ;;           (:static-public-key initiator) (IUTid) ||
+        ;;           (:static-public-key responder) (CAVSid) ||
+        ;;           (:ephemeral-public-key initiator) (YephemIUT)
+        ;;           nonce (responder) (NonceEphemCAVS)
 
-      (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1 nonce]
-        (compute-mac-tag (:algorithm key-confirmation)
-                         mac-key
-                         (make-mac-data kc-1-u
-                                        (conversions/big-int->hex-str static-public-key-1)
-                                        (conversions/big-int->hex-str static-public-key-2)
-                                        (conversions/big-int->hex-str ephemeral-public-key-1)
-                                        nonce)))
+        (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1 nonce]
+          (compute-mac-tag (:algorithm key-confirmation)
+                           mac-key
+                           (make-mac-data kc-1-u
+                                          (conversions/big-int->hex-str static-public-key-1)
+                                          (conversions/big-int->hex-str static-public-key-2)
+                                          (conversions/big-int->hex-str ephemeral-public-key-1)
+                                          nonce)))
 
-      [:mqv1 :unilateral :responder :recipient]
+        [:mqv1 :unilateral :responder :recipient]
 
-      ;; MacData = "KC_1_U" ||
-      ;;           (:static-public-key responder) (CAVSid) ||
-      ;;           (:static-public-key initiator) (IUTid) ||
-      ;;           (:ephemeral-public-key responder) (YephemCAVS) ||
-      ;;           nonce (initiator) (NonceEphemIUT)
+        ;; MacData = "KC_1_U" ||
+        ;;           (:static-public-key responder) (CAVSid) ||
+        ;;           (:static-public-key initiator) (IUTid) ||
+        ;;           (:ephemeral-public-key responder) (YephemCAVS) ||
+        ;;           nonce (initiator) (NonceEphemIUT)
 
-      (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1 nonce candidate-mac-tag]
-        (eq? candidate-mac-tag
-             (compute-mac-tag (:algorithm key-confirmation)
-                              mac-key
-                              (make-mac-data kc-1-u
-                                             (conversions/big-int->hex-str static-public-key-1)
-                                             (conversions/big-int->hex-str static-public-key-2)
-                                             (conversions/big-int->hex-str ephemeral-public-key-1)
-                                             nonce))))
+        (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1 nonce candidate-mac-tag]
+          (eq? candidate-mac-tag
+               (compute-mac-tag (:algorithm key-confirmation)
+                                mac-key
+                                (make-mac-data kc-1-u
+                                               (conversions/big-int->hex-str static-public-key-1)
+                                               (conversions/big-int->hex-str static-public-key-2)
+                                               (conversions/big-int->hex-str ephemeral-public-key-1)
+                                               nonce))))
 
-      [:mqv1 :unilateral :initiator :recipient]
+        [:mqv1 :unilateral :responder :provider]
 
-      ;; MacData = "KC_1_V" ||
-      ;;           (:static-public-key responder) (CAVSid) ||
-      ;;           (:static-public-key initiator) (IUTid) ||
-      ;;           (:ephemeral-public-key initiator) (YephemIUT)
+        ;; MacData = "KC_1_V" ||
+        ;;           (:static-public-key initiator) (IUTid) ||
+        ;;           (:static-public-key responder) (CAVSid) ||
+        ;;           (:ephemeral-public-key responder) (YephemCAVS)
 
-      (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1 candidate-mac-tag]
-        (eq? candidate-mac-tag
-             (compute-mac-tag (:algorithm key-confirmation)
-                              mac-key
-                              (make-mac-data kc-1-v
-                                             (conversions/big-int->hex-str static-public-key-1)
-                                             (conversions/big-int->hex-str static-public-key-2)
-                                             (conversions/big-int->hex-str ephemeral-public-key-1)))))
+        (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1]
+          (compute-mac-tag (:algorithm key-confirmation)
+                           mac-key
+                           (make-mac-data kc-1-v
+                                          (conversions/big-int->hex-str static-public-key-1)
+                                          (conversions/big-int->hex-str static-public-key-2)
+                                          (conversions/big-int->hex-str ephemeral-public-key-1))))
 
-      [:mqv1 :unilateral :responder :provider]
+        [:mqv1 :unilateral :initiator :recipient]
 
-      ;; MacData = "KC_1_V" ||
-      ;;           (:static-public-key initiator) (IUTid) ||
-      ;;           (:static-public-key responder) (CAVSid) ||
-      ;;           (:ephemeral-public-key responder) (YephemCAVS)
+        ;; MacData = "KC_1_V" ||
+        ;;           (:static-public-key responder) (CAVSid) ||
+        ;;           (:static-public-key initiator) (IUTid) ||
+        ;;           (:ephemeral-public-key initiator) (YephemIUT)
 
-      (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1]
-        (compute-mac-tag (:algorithm key-confirmation)
-                         mac-key
-                         (make-mac-data kc-1-v
-                                        (conversions/big-int->hex-str static-public-key-1)
-                                        (conversions/big-int->hex-str static-public-key-2)
-                                        (conversions/big-int->hex-str ephemeral-public-key-1)))))))
+        (fn [static-public-key-1 static-public-key-2 ephemeral-public-key-1 candidate-mac-tag]
+          (eq? candidate-mac-tag
+               (compute-mac-tag (:algorithm key-confirmation)
+                                mac-key
+                                (make-mac-data kc-1-v
+                                               (conversions/big-int->hex-str static-public-key-1)
+                                               (conversions/big-int->hex-str static-public-key-2)
+                                               (conversions/big-int->hex-str ephemeral-public-key-1)))))))))
