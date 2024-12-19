@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-clj -Tcljfmt fix
+clj -Tcljfmt fix "{:sort-ns-references? true}"
