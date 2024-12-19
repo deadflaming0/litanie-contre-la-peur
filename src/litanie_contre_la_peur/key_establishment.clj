@@ -1,5 +1,4 @@
-(ns litanie-contre-la-peur.core
-  "Implementation of FFC MQV — C(1e, 2s) (MQV1) and C(2e, 2s) (MQV2) — as specified in NIST Special Publication 800-56A Revision 3."
+(ns litanie-contre-la-peur.key-establishment
   (:require [litanie-contre-la-peur.conversions :as conversions]
             [litanie-contre-la-peur.key-derivation :as key-derivation])
   (:import (java.math RoundingMode)))
@@ -21,7 +20,7 @@
       :bottom
       (let [t (.bitLength p)
             n (quot t 4)
-            Z (conversions/big-int->hex-str z)]
+            Z (conversions/big-integer->hexadecimal-string z)]
         (subs Z (- (count Z) n))))))
 
 (defn- valid-public-key?
@@ -78,7 +77,7 @@
            :mqv1 (:static-public-key initiator)
            :mqv2 (:ephemeral-public-key initiator))}))
 
-(defn agreement
+(defn agreement ;; TODO: make it private
   [scheme role domain-parameters initiator responder]
   (let [{:keys [xA yA yB rA tA tB]} (scheme+role->agreement-keys
                                      scheme
@@ -101,10 +100,10 @@
             fixed-info (key-derivation/fixed-info role
                                                   (-> initiator
                                                       :static-public-key
-                                                      conversions/big-int->hex-str)
+                                                      conversions/big-integer->hexadecimal-string)
                                                   (-> responder
                                                       :static-public-key
-                                                      conversions/big-int->hex-str)
+                                                      conversions/big-integer->hexadecimal-string)
                                                   (:salt key-derivation))]
         (key-derivation/dkm (:algorithm key-derivation)
                             result

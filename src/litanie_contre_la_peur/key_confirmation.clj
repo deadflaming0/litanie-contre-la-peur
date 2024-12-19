@@ -14,20 +14,20 @@
 (defn- compute-mac-tag
   [algorithm mac-key mac-data]
   (let [algorithm-name (name algorithm)
-        mac-key' (SecretKeySpec. (conversions/hex-str->byte-array mac-key) algorithm-name)
-        mac-data' (conversions/hex-str->byte-array mac-data)
+        mac-key' (SecretKeySpec. (conversions/hexadedecimal-string->byte-array mac-key) algorithm-name)
+        mac-data' (conversions/hexadedecimal-string->byte-array mac-data)
         mac (Mac/getInstance algorithm-name)]
     (.init mac mac-key')
-    (conversions/byte-array->hex-str (.doFinal mac mac-data'))))
+    (conversions/byte-array->hexadedecimal-string (.doFinal mac mac-data'))))
 
 (defn- make-mac-data
   [message-string & segments]
   (apply concat message-string segments))
 
 (def ^:private kc-1-u
-  (-> "KC_1_U" .getBytes conversions/byte-array->hex-str))
+  (-> "KC_1_U" .getBytes conversions/byte-array->hexadedecimal-string))
 (def ^:private kc-1-v
-  (-> "KC_1_V" .getBytes conversions/byte-array->hex-str))
+  (-> "KC_1_V" .getBytes conversions/byte-array->hexadedecimal-string))
 
 (defn- extract-mac-key
   [dkm]
@@ -67,9 +67,9 @@
           (compute-mac-tag (:algorithm key-confirmation)
                            mac-key
                            (make-mac-data kc-1-u
-                                          (conversions/big-int->hex-str static-public-key-1)
-                                          (conversions/big-int->hex-str static-public-key-2)
-                                          (conversions/big-int->hex-str ephemeral-public-key-1)
+                                          (conversions/big-integer->hexadecimal-string static-public-key-1)
+                                          (conversions/big-integer->hexadecimal-string static-public-key-2)
+                                          (conversions/big-integer->hexadecimal-string ephemeral-public-key-1)
                                           nonce)))
 
         [:mqv1 :unilateral :responder :recipient]
@@ -85,9 +85,9 @@
                (compute-mac-tag (:algorithm key-confirmation)
                                 mac-key
                                 (make-mac-data kc-1-u
-                                               (conversions/big-int->hex-str static-public-key-1)
-                                               (conversions/big-int->hex-str static-public-key-2)
-                                               (conversions/big-int->hex-str ephemeral-public-key-1)
+                                               (conversions/big-integer->hexadecimal-string static-public-key-1)
+                                               (conversions/big-integer->hexadecimal-string static-public-key-2)
+                                               (conversions/big-integer->hexadecimal-string ephemeral-public-key-1)
                                                nonce))))
 
         [:mqv1 :unilateral :responder :provider]
@@ -101,9 +101,9 @@
           (compute-mac-tag (:algorithm key-confirmation)
                            mac-key
                            (make-mac-data kc-1-v
-                                          (conversions/big-int->hex-str static-public-key-1)
-                                          (conversions/big-int->hex-str static-public-key-2)
-                                          (conversions/big-int->hex-str ephemeral-public-key-1))))
+                                          (conversions/big-integer->hexadecimal-string static-public-key-1)
+                                          (conversions/big-integer->hexadecimal-string static-public-key-2)
+                                          (conversions/big-integer->hexadecimal-string ephemeral-public-key-1))))
 
         [:mqv1 :unilateral :initiator :recipient]
 
@@ -117,6 +117,6 @@
                (compute-mac-tag (:algorithm key-confirmation)
                                 mac-key
                                 (make-mac-data kc-1-v
-                                               (conversions/big-int->hex-str static-public-key-1)
-                                               (conversions/big-int->hex-str static-public-key-2)
-                                               (conversions/big-int->hex-str ephemeral-public-key-1)))))))))
+                                               (conversions/big-integer->hexadecimal-string static-public-key-1)
+                                               (conversions/big-integer->hexadecimal-string static-public-key-2)
+                                               (conversions/big-integer->hexadecimal-string ephemeral-public-key-1)))))))))
