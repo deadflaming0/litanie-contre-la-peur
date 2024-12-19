@@ -1,6 +1,6 @@
-(ns litanie-contre-la-peur.key-establishment
-  (:require [litanie-contre-la-peur.conversions :as conversions]
-            [litanie-contre-la-peur.key-derivation :as key-derivation])
+(ns litanie-contre-la-peur.building-blocks.key-establishment
+  (:require [litanie-contre-la-peur.building-blocks.key-derivation :as key-derivation]
+            [litanie-contre-la-peur.helpers.conversions :as conversions])
   (:import (java.math RoundingMode)))
 
 (defn- shared-secret

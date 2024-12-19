@@ -1,7 +1,7 @@
-(ns litanie-contre-la-peur.key-establishment-test
+(ns litanie-contre-la-peur.building-blocks.key-establishment-test
   (:require [clojure.test :refer :all]
-            [litanie-contre-la-peur.conversions :as conversions]
-            [litanie-contre-la-peur.key-establishment :as key-establishment]))
+            [litanie-contre-la-peur.building-blocks.key-establishment :as key-establishment]
+            [litanie-contre-la-peur.helpers.conversions :as conversions]))
 
 (deftest ffcmqv1-nokc-zzonly-initiator-1-test
   (let [domain-parameters

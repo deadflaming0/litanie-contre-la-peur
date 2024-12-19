@@ -1,6 +1,6 @@
-(ns litanie-contre-la-peur.key-derivation-test
+(ns litanie-contre-la-peur.building-blocks.key-derivation-test
   (:require [clojure.test :refer :all]
-            [litanie-contre-la-peur.key-derivation :as key-derivation]))
+            [litanie-contre-la-peur.building-blocks.key-derivation :as key-derivation]))
 
 (def L 112)
 

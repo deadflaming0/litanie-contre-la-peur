@@ -1,7 +1,7 @@
-(ns litanie-contre-la-peur.key-confirmation-test
+(ns litanie-contre-la-peur.building-blocks.key-confirmation-test
   (:require [clojure.test :refer :all]
-            [litanie-contre-la-peur.conversions :as conversions]
-            [litanie-contre-la-peur.key-confirmation :as kc]))
+            [litanie-contre-la-peur.building-blocks.key-confirmation :as kc]
+            [litanie-contre-la-peur.helpers.conversions :as conversions]))
 
 (def initiator
   {:static-private-key (conversions/hexadecimal-string->big-integer "6f378694fd0affa3d67bd1324adf5d0b2b55d11f8912751dc538d7d6")

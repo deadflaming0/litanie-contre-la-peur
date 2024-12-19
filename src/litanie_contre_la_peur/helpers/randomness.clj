@@ -1,4 +1,4 @@
-(ns litanie-contre-la-peur.randomness
+(ns litanie-contre-la-peur.helpers.randomness
   (:import (java.security SecureRandom)))
 
 (defn random-bytes ;; TODO: ver tamanho mínimo p/ salt

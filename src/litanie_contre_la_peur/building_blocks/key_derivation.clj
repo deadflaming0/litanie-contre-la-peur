@@ -1,5 +1,5 @@
-(ns litanie-contre-la-peur.key-derivation
-  (:require [litanie-contre-la-peur.conversions :as conversions])
+(ns litanie-contre-la-peur.building-blocks.key-derivation
+  (:require [litanie-contre-la-peur.helpers.conversions :as conversions])
   (:import (java.security MessageDigest)))
 
 (defn fixed-info

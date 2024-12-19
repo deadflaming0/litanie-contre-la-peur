@@ -1,5 +1,5 @@
-(ns litanie-contre-la-peur.key-confirmation
-  (:require [litanie-contre-la-peur.conversions :as conversions])
+(ns litanie-contre-la-peur.building-blocks.key-confirmation
+  (:require [litanie-contre-la-peur.helpers.conversions :as conversions])
   (:import (javax.crypto Mac)
            (javax.crypto.spec SecretKeySpec)))
 

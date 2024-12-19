@@ -6,7 +6,7 @@ This project implements a partial Clojure FFC (Finite Field Cryptography) versio
 
 ```clj
 (require '[litanie-contre-la-peur.api :as api])
-(require '[litanie-contre-la-peur.conversions :as conversions])
+(require '[litanie-contre-la-peur.helpers.conversions :as conversions])
 
 ;; 1. define protocol settings (alternatives are presented in decreasing order of security preference)
 (def protocol-settings

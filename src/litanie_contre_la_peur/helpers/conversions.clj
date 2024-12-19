@@ -1,4 +1,4 @@
-(ns litanie-contre-la-peur.conversions)
+(ns litanie-contre-la-peur.helpers.conversions)
 
 (defn byte-array->hexadecimal-string
   [x]
