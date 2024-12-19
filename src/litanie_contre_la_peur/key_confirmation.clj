@@ -14,20 +14,20 @@
 (defn- compute-mac-tag
   [algorithm mac-key mac-data]
   (let [algorithm-name (name algorithm)
-        mac-key' (SecretKeySpec. (conversions/hexadedecimal-string->byte-array mac-key) algorithm-name)
-        mac-data' (conversions/hexadedecimal-string->byte-array mac-data)
+        mac-key' (SecretKeySpec. (conversions/hexadecimal-string->byte-array mac-key) algorithm-name)
+        mac-data' (conversions/hexadecimal-string->byte-array mac-data)
         mac (Mac/getInstance algorithm-name)]
     (.init mac mac-key')
-    (conversions/byte-array->hexadedecimal-string (.doFinal mac mac-data'))))
+    (conversions/byte-array->hexadecimal-string (.doFinal mac mac-data'))))
 
 (defn- make-mac-data
   [message-string & segments]
   (apply concat message-string segments))
 
 (def ^:private kc-1-u
-  (-> "KC_1_U" .getBytes conversions/byte-array->hexadedecimal-string))
+  (-> "KC_1_U" .getBytes conversions/byte-array->hexadecimal-string))
 (def ^:private kc-1-v
-  (-> "KC_1_V" .getBytes conversions/byte-array->hexadedecimal-string))
+  (-> "KC_1_V" .getBytes conversions/byte-array->hexadecimal-string))
 
 (defn- extract-mac-key
   [dkm]

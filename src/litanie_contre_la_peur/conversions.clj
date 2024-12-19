@@ -1,10 +1,10 @@
 (ns litanie-contre-la-peur.conversions)
 
-(defn byte-array->hexadedecimal-string
+(defn byte-array->hexadecimal-string
   [x]
   (apply str (map #(format "%02x" %) x)))
 
-(defn hexadedecimal-string->byte-array
+(defn hexadecimal-string->byte-array
   [x]
   (byte-array
    (map #(unchecked-byte (Integer/parseInt (apply str %) 16))
@@ -17,4 +17,4 @@
 (defn big-integer->hexadecimal-string
   [x]
   (let [ba (.toByteArray x)]
-    (byte-array->hexadedecimal-string ba)))
+    (byte-array->hexadecimal-string ba)))
