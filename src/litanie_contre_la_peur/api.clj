@@ -5,16 +5,8 @@
   (:require [litanie-contre-la-peur.key-confirmation :as key-confirmation]
             [litanie-contre-la-peur.key-establishment :as key-establishment]))
 
-;; 1. define protocol settings
-(def protocol-settings
-  {})
+(def establish-key
+  key-establishment/establish-key)
 
-;; 2. define domain parameters
-
-;; 3. generate initiator keys
-
-;; 4. generate responder keys
-
-;; 5. establish key
-
-;; optional: confirm key
+(def mac-tag-function
+  key-confirmation/mac-tag-function)
