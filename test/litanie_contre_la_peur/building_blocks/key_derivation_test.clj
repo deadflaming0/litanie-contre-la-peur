@@ -1,4 +1,5 @@
 (ns litanie-contre-la-peur.building-blocks.key-derivation-test
+  {:clj-kondo/config '{:linters {:refer-all {:level :off}}}}
   (:require [clojure.test :refer :all]
             [litanie-contre-la-peur.building-blocks.key-derivation :as key-derivation]))
 

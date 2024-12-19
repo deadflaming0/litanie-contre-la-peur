@@ -1,4 +1,5 @@
 (ns litanie-contre-la-peur.building-blocks.key-establishment-test
+  {:clj-kondo/config '{:linters {:refer-all {:level :off}}}}
   (:require [clojure.test :refer :all]
             [litanie-contre-la-peur.building-blocks.key-establishment :as key-establishment]
             [litanie-contre-la-peur.helpers.conversions :as conversions]))

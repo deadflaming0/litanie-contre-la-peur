@@ -1,4 +1,5 @@
 (ns litanie-contre-la-peur.helpers.conversions-test
+  {:clj-kondo/config '{:linters {:refer-all {:level :off}}}}
   (:require [clojure.string :as string]
             [clojure.test :refer :all]
             [litanie-contre-la-peur.helpers.conversions :as conversions]))
