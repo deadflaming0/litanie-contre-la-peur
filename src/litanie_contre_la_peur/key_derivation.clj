@@ -20,4 +20,4 @@
         H (MessageDigest/getInstance (name algorithm))
         dkm-bytes (.digest H input)]
     (conversions/byte-array->hexadecimal-string (take (quot L 8) ;; TODO: add `L` validation
-                                                        dkm-bytes))))
+                                                      dkm-bytes))))
