@@ -1,7 +1,7 @@
 (ns litanie-contre-la-peur.helpers.randomness
   (:import (java.security SecureRandom)))
 
-(defn random-bytes ;; TODO: ver tamanho mínimo p/ salt
+(defn random-bytes ;; TODO: add `n` validation
   [n]
   (let [secure-random (SecureRandom.)
         ba (byte-array n)]

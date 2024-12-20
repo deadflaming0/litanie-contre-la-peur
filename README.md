@@ -85,5 +85,5 @@ This project implements a partial Clojure FFC (Finite Field Cryptography) versio
                               (:ephemeral-public-key initiator)
                               nonce
                               mac-tag)
-(assert (true? verify-result))
+(true? verify-result) ;; => true
 ```
